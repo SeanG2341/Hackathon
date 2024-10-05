@@ -159,9 +159,10 @@ let earth = createPlanet({
 
 // Updated NEO Data with velocity property
 let neoData = [
-  { full_name: "Cadmus", a: 2, e: 0.6, i: -65.1, height: 1.4, size: 0.03, velocity: 1 },
-  { full_name: "Sisyphus", a: 0.32, e: 0.9, i: 1.1, height: 0.4, size: 0.04, velocity: -1.4 },
-  { full_name: "Amor", a: 21, e: 0.2, i: 32.0, height: 0.4, size: 0.02, velocity: 0.6 },
+  { full_name: "Atira", a: 0.7, e: 0.3322, i: 25.62, height: 1.4, size: 0.03, velocity: 1 },
+  { full_name: "'Aylo'chaxnim", a: 0.55, e: 0.177, i: -15.8, height: 0.4, size: 0.04, velocity: -1.4 },
+  { full_name: "TG45", a: 0.68, e: 0.37, i: 23.33, height: 0.6, size: 0.08, velocity: 0.8},
+  { full_name: "XZ130", a: 0.6, e: 0.45, i: 2.95, height: 0.4, size: 0.02, velocity: 0.6 },
   { full_name: "Moon", a: 4, e: 0.1, i: 5.1, height: 0.9, size: 0.15, velocity: 0.3, url: 'https://www.solarsystemscope.com/textures/download/2k_moon.jpg' },
 ];
 
