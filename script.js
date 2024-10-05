@@ -1,4 +1,3 @@
-// Scene, Camera, Renderer
 let renderer = new THREE.WebGLRenderer();
 let scene = new THREE.Scene();
 let aspect = window.innerWidth / window.innerHeight;
@@ -11,10 +10,8 @@ let orbitControls = new THREE.OrbitControls(camera);
 
 let spotLight = new THREE.SpotLight(0xffffff, 1, 0, 10, 2);
 
-// Texture Loader
 let textureLoader = new THREE.TextureLoader();
 
-// Planet Proto
 let planetProto = {
   sphere: function (size) {
     let sphere = new THREE.SphereGeometry(size, 32, 32);
@@ -73,14 +70,11 @@ let planetProto = {
   }
 };
 
-// Create planet function
 let createPlanet = function (options) {
-  // Create the planet's Surface
   let surfaceGeometry = planetProto.sphere(options.surface.size);
   let surfaceMaterial = planetProto.material(options.surface.material);
   let surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
 
-  // Create the planet's Atmosphere
   let atmosphereGeometry = planetProto.sphere(options.surface.size + options.atmosphere.size);
   let atmosphereMaterialDefaults = {
     side: THREE.DoubleSide,
@@ -91,12 +85,10 @@ let createPlanet = function (options) {
   let atmosphereMaterial = planetProto.material(atmosphereMaterialOptions);
   let atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
 
-  // Create the planet's Atmospheric glow
   let atmosphericGlowGeometry = planetProto.sphere(options.surface.size + options.atmosphere.size + options.atmosphere.glow.size);
   let atmosphericGlowMaterial = planetProto.glowMaterial(options.atmosphere.glow.intensity, options.atmosphere.glow.fade, options.atmosphere.glow.color);
   let atmosphericGlow = new THREE.Mesh(atmosphericGlowGeometry, atmosphericGlowMaterial);
 
-  // Nest the planet's Surface and Atmosphere into a planet object
   let planet = new THREE.Object3D();
   surface.name = 'surface';
   atmosphere.name = 'atmosphere';
@@ -105,7 +97,6 @@ let createPlanet = function (options) {
   planet.add(atmosphere);
   planet.add(atmosphericGlow);
 
-  // Load the Surface's textures
   for (let textureProperty in options.surface.textures) {
     planetProto.texture(
       surfaceMaterial,
@@ -113,7 +104,6 @@ let createPlanet = function (options) {
       options.surface.textures[textureProperty]);
   }
 
-  // Load the Atmosphere's texture
   for (let textureProperty in options.atmosphere.textures) {
     planetProto.texture(
       atmosphereMaterial,
@@ -124,7 +114,6 @@ let createPlanet = function (options) {
   return planet;
 };
 
-// Create Earth model
 let earth = createPlanet({
   surface: {
     size: 0.5,
@@ -157,13 +146,12 @@ let earth = createPlanet({
   }
 });
 
-// Updated NEO Data with velocity property
 let neoData = [
-  { full_name: "Atira", a: 0.7, e: 0.3322, i: 25.62, height: 1.4, size: 0.03, velocity: 1 },
-  { full_name: "'Aylo'chaxnim", a: 0.55, e: 0.177, i: -15.8, height: 0.4, size: 0.04, velocity: -1.4 },
-  { full_name: "TG45", a: 0.68, e: 0.37, i: 23.33, height: 0.6, size: 0.08, velocity: 0.8},
-  { full_name: "XZ130", a: 0.6, e: 0.45, i: 2.95, height: 0.4, size: 0.02, velocity: 0.6 },
-  { full_name: "Moon", a: 4, e: 0.1, i: 5.1, height: 0.9, size: 0.15, velocity: 0.3, url: 'https://www.solarsystemscope.com/textures/download/2k_moon.jpg' },
+  { full_name: "Atira", a: 0.7, e: 0.3322, i: 25.62, height: 1.4, size: 0.03, velocity: 1},
+  { full_name: "'Aylo'chaxnim", a: 0.55, e: 0.177, i: -15.8, height: 0.4, size: 0.04, velocity: -1.4},
+  { full_name: "TG45", a: 0.68, e: 0.37, i: 23.33, height: 0.6, size: 0.06, velocity: 0.8, url: 'https://www.solarsystemscope.com/textures/download/2k_moon.jpg'},
+  { full_name: "XZ130", a: 0.6, e: 0.45, i: 2.95, height: 0.4, size: 0.02, velocity: 0.6,},
+  { full_name: "Moon", a: 4, e: 0.1, i: 5.1, height: 0.9, size: 0.15, velocity: 0.3, url: 'https://seang2341.github.io/Ksiezyc/' },
 ];
 
 function orbitalToCartesian(a, e, i, theta) {
@@ -174,7 +162,6 @@ function orbitalToCartesian(a, e, i, theta) {
   const p = a * (1 - e * e);  
   const r = p / (1 + e * Math.cos(theta));  
 
-  // Calculate position in the orbital plane (before applying inclination)
   const x_orbital = r * Math.cos(theta);
   const y_orbital = r * Math.sin(theta);
 
@@ -185,18 +172,15 @@ function orbitalToCartesian(a, e, i, theta) {
   return { x, y, z };
 }
 
-// Function to place NEO markers with individual height, size, and velocity
 function placeNEOMarkers() {
     neoData.forEach(neo => {
-        neo.theta = 0; // Initialize theta (true anomaly) for each NEO
-        const markerMesh = createNEOMarker(neo); // Create the marker
+        neo.theta = 0; 
+        const markerMesh = createNEOMarker(neo);
 
-        earth.getObjectByName('surface').add(markerMesh); // Add marker to the earth surface
-        neo.mesh = markerMesh; // Save the mesh for updating later
+        earth.getObjectByName('surface').add(markerMesh);
+        neo.mesh = markerMesh;
     });
     
-
-    // Function to update positions of NEO markers over time
     function updateMarkers() {
         neoData.forEach(neo => {
             neo.theta += neo.velocity; 
@@ -238,7 +222,6 @@ function createNEOMarker(neo) {
   marker.position.copy(newPosition);
   marker.name = neo.full_name; 
 
-  // Add URL to the userData only for the Moon
   if (neo.url) {
     marker.userData.url = neo.url;
   }
@@ -247,32 +230,26 @@ function createNEOMarker(neo) {
 }
 
 
-// Raycaster for mouse events
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 window.addEventListener('click', (event) => {
-  // Convert mouse coordinates to normalized device coordinates (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  // Update the raycaster with the camera and mouse position
   raycaster.setFromCamera(mouse, camera);
 
-  // Calculate objects intersecting the picking ray
   const intersects = raycaster.intersectObjects(earth.getObjectByName('surface').children);
 
   if (intersects.length > 0) {
     const intersectedObject = intersects[0].object;
 
     if (intersectedObject.userData.url) {
-      window.open(intersectedObject.userData.url, '_blank'); // Open the URL in a new tab
+      window.open(intersectedObject.userData.url, '_blank');
     }
   }
 });
 
-
-// Marker Proto (updated to use texture)
 let markerProto = {
   latLongToVector3: function latLongToVector3(latitude, longitude, radius, height) {
       var phi = latitude * Math.PI / 180;
@@ -285,7 +262,6 @@ let markerProto = {
       return new THREE.Vector3(x, y, z);
   },
   
-  // Use texture instead of color
   marker: function marker(size, vector3Position) {
       let markerGeometry = new THREE.SphereGeometry(size);
       
@@ -295,14 +271,12 @@ let markerProto = {
 
 
 
-// Place Marker
 let placeMarker = function (object, options) {
   let position = markerProto.latLongToVector3(options.latitude, options.longitude, options.radius, options.height);
   let marker = markerProto.marker(options.size, options.texture, position);
   object.add(marker);
 };
 
-// Place Marker At Address
 let placeMarkerAtAddress = function (address, texture) {
   let encodedLocation = address.replace(/\s/g, '+');
   let httpRequest = new XMLHttpRequest();
@@ -322,7 +296,6 @@ let placeMarkerAtAddress = function (address, texture) {
 };
 
 
-// Galaxy
 let galaxyGeometry = new THREE.SphereGeometry(100, 32, 32);
 let galaxyMaterial = new THREE.MeshBasicMaterial({
   side: THREE.BackSide
@@ -330,7 +303,6 @@ let galaxyMaterial = new THREE.MeshBasicMaterial({
 
 let galaxy = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
 
-// Load Galaxy Textures
 textureLoader.crossOrigin = true;
 textureLoader.load(
   'https://s3-us-west-2.amazonaws.com/s.cdpn.io/141228/starfield.png',
@@ -339,7 +311,6 @@ textureLoader.load(
     scene.add(galaxy);
   });
 
-// Scene, Camera, Renderer Configuration
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -350,22 +321,18 @@ scene.add(camera);
 scene.add(spotLight);
 scene.add(earth);
 
-// Light Configurations
 spotLight.position.set(1, 1, 1);
 
-// Mesh Configurations
 earth.receiveShadow = true;
 earth.castShadow = true;
 earth.getObjectByName('surface').geometry.center();
 
-// On window resize, adjust camera aspect ratio and renderer size
 window.addEventListener('resize', function () {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Main render function
 let render = function () {
   earth.getObjectByName('surface').rotation.y += 1 / 32 * 0.01;
   earth.getObjectByName('atmosphere').rotation.y += 1 / 16 * 0.01;
@@ -382,10 +349,8 @@ let render = function () {
 
 render();
 
-// Place NEO markers
 placeNEOMarkers();
 
-// dat.gui
 var gui = new dat.GUI();
 var guiCamera = gui.addFolder('Camera');
 var guiSurface = gui.addFolder('Surface');
@@ -393,7 +358,6 @@ var guiMarkers = guiSurface.addFolder('Markers');
 var guiAtmosphere = gui.addFolder('Atmosphere');
 var guiAtmosphericGlow = guiAtmosphere.addFolder('Glow');
 
-// dat.gui controls object
 var cameraControls = new function () {
   this.speed = cameraRotationSpeed;
   this.orbitControls = !cameraAutoRotation;
@@ -423,7 +387,6 @@ var atmosphericGlowControls = new function () {
   this.color = 0x93cfef;
 }();
 
-// dat.gui controls
 guiCamera.add(cameraControls, 'speed', 0, 0.1).step(0.001).onChange(function (value) {
   cameraRotationSpeed = value;
 });
@@ -442,7 +405,7 @@ guiSurface.add(surfaceControls, 'shininess', 0, 30).onChange(function (value) {
   earth.getObjectByName('surface').material.shininess = value;
 });
 
-guiAtmosphere.add(atmosphereControls, 'opacity', 0, 1).onChange(function (value) {
+guiAtmosphere.add(atmosphereControls, 'opacity', 0, 8).onChange(function (value) {
   earth.getObjectByName('atmosphere').material.opacity = value;
 });
 
